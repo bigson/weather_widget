@@ -25,7 +25,9 @@ export default async function (data, callback){
             callback(response)
         })
         .catch(function (error) {
-            if (error.response) {}
+            if (error.response) {
+                console.log('abc')
+            }
         });
     }else{
         return await axios(defaultConfig)

@@ -1,4 +1,5 @@
 // import apiCategories from '@/api/categories'
+import request from '@/utils/request';
 import {
     API_APP_KEY,
     API_SEARCH_CITY,
@@ -8,7 +9,7 @@ import {
     MUTATION_SET_CITY,
     MUTATION_SET_WEATHER_DATA,
     ACTION_LOAD_SEARCH_CITY,
-    ACTION_LOAD_WEATHER_DATA,
+    // ACTION_LOAD_WEATHER_DATA,
 } from './config.js'
 
 // initial state
@@ -39,27 +40,44 @@ const mutations = {
 
 // actions
 const actions = {
-    async [ACTION_LOAD_SEARCH_CITY]({ commit, state }) {
-        let url = API_SEARCH_CITY + '?appid'
+    async [ACTION_LOAD_SEARCH_CITY]({ commit }, nameCity) {
+        console.log('action', ACTION_LOAD_SEARCH_CITY, nameCity)
 
-        return await apiWeather(
-                        API_SEARCH_CITY,
-                        {
-                            appid : API_APP_KEY
-                        }).then(function(response) {
-                            // console.log('after call api categories')
-                            // resolve(response);
-                            commit(MUTATION_SET_CITY, response.data.data);
-                        })
+        let searchCity = await apiWeather(
+                                            API_SEARCH_CITY,
+                                            {
+                                                appid : API_APP_KEY,
+                                                q     : nameCity
+                                            }
+                                        )
+        commit(MUTATION_SET_CITY, searchCity.data)
+
+        if(!searchCity.data || !searchCity.data.coord){
+            return
+        }
+
+        let coord       = searchCity.data.coord,
+            weatherData = await apiWeather(
+                                            API_WEATHER_DATA,
+                                            {
+                                                appid   : API_APP_KEY,
+                                                lat     : coord.lat,
+                                                lon     : coord.lon,
+                                                exclude : 'hourly,minutely',
+                                            }
+                                        )
+
+        commit(MUTATION_SET_WEATHER_DATA, weatherData.data);
     },
 
-    async [ACTION_LOAD_WEATHER_DATA]({ commit, state }) {
-        let url = API_WEATHER_DATA + '?appid'
-        API_APP_KEY ++
-    }
+    // async [ACTION_LOAD_WEATHER_DATA]({ commit }) {
+    //     let url = API_WEATHER_DATA + '?appid'
+    //     API_APP_KEY ++
+    // }
 }
 
 async function apiWeather(api, params){
+    console.log('apiWeather', api, params)
     return await request({
         params : params,
         url    : api,
