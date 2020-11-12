@@ -31,12 +31,6 @@ const getters = {
     [GETTER_WEATHER_DATA]: (state) => {
         return state.weatherData
     },
-    [GETTER_WEATHER_DATA]: (state) => {
-        return state.weatherData
-    },
-    [GETTER_WEATHER_DATA]: (state) => {
-        return state.weatherData
-    },
     [GETTER_CURRENT_WEATHER]: (state) => {
         return state.current
     },
@@ -53,11 +47,12 @@ const mutations = {
     [MUTATION_SET_WEATHER_DATA](state, weatherData){
         state.weatherData = weatherData
 
-        if(weatherData.daily.length){
+        state.current = weatherData.current
+        if(weatherData.daily.length > 1){
             // let {current, ...forecast} = weatherData.daily
 
-            state.current  = weatherData.daily.splice(0,1)
-            state.forecast = weatherData.daily
+            // state.current  = weatherData.daily.splice(0,1)
+            state.forecast = weatherData.daily.splice(1)
         }
     },
     [MUTATION_SET_EMPTY_DATA] (state){

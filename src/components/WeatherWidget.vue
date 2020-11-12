@@ -26,9 +26,11 @@
                 <div class="weather__current">
                     <h2></h2>
                     <div>
-                        <div class="current__icon"></div>
+                        <div class="current__icon">
+                            <img :src="getIcon(currentWeather.weather[0].icon+'@2x')" :alt="currentWeather.weather[0].description">
+                        </div>
                         <div class="current__temperature">
-                            <img src="" alt="">
+
                         </div>
                         <div class="current__info"></div>
                     </div>
@@ -37,7 +39,7 @@
                     <div class="weather__item" v-for="(item, index) in forecastWeather.slice(0, 4)" :key="index">
                         <div class="item__weekday">{{ getWeekday(item.dt) }}</div>
                         <div class="item__icon">
-                            <img src="" alt="">
+                            <img :src="getIcon(item.weather[0].icon)" :alt="item.weather[0].description">
                         </div>
                         <div class="item__temperature">{{item.temp.day}}℃</div>
                     </div>
@@ -72,6 +74,7 @@ export default {
             currentWeather  : computed(() => store.getters[WEATHER_GETTER_CURRENT_WEATHER]),
             forecastWeather : computed(() => store.getters[WEATHER_GETTER_FORECAST_WEATHER]),
             getWeekday      : (time) => weekdays[moment.unix(time).day()],
+            getIcon         : (name) => `http://openweathermap.org/img/wn/${name}.png`,
             searchCity      : (city) => {
                 if(city){
                     store.dispatch(WEATHER_ACTION_LOAD_SEARCH_CITY, city)
