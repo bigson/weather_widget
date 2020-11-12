@@ -6,9 +6,9 @@
             </div>
             <div class="weather__form">
                 <div class="form-input">
-                    <input type="text" v-model.trim="keyword" @keyup.enter="searchCity(keyword)">
+                    <input type="text" v-model.trim="keyword" @keyup.enter="searchCity(keyword)" name="city_name">
                 </div>
-                <button class="form-btn" @click="searchCity(keyword)">Search</button>
+                <button class="form-btn btn-search-city" @click="searchCity(keyword)">Search</button>
             </div>
         </div>
         <div class="weather__body">

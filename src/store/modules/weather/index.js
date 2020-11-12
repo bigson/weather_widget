@@ -130,15 +130,10 @@ const actions = {
         commit(MUTATION_SET_WEATHER_DATA, weatherData.data);
         commit(MUTATION_SET_MESSAGE, '');
     },
-
-    // async [ACTION_LOAD_WEATHER_DATA]({ commit }) {
-    //     let url = API_WEATHER_DATA + '?appid'
-    //     API_APP_KEY ++
-    // }
 }
 
 async function apiWeather(api, params){
-    console.log('apiWeather', api, params)
+    // console.log('apiWeather', api, params)
     return await axios({
                         params : params,
                         url    : api,
