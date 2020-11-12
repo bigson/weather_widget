@@ -1,32 +1,40 @@
-// import apiCategories from '@/api/categories'
-import request from '@/utils/request';
+import axios from 'axios'
 import {
     API_APP_KEY,
     API_SEARCH_CITY,
     API_WEATHER_DATA,
     GETTER_CITY,
+    GETTER_MESSAGE,
     GETTER_WEATHER_DATA,
     GETTER_CURRENT_WEATHER,
     GETTER_FORECAST_WEATHER,
     MUTATION_SET_CITY,
     MUTATION_SET_WEATHER_DATA,
     MUTATION_SET_EMPTY_DATA,
+    MUTATION_SET_STATE_DATA,
+    MUTATION_SET_MESSAGE,
     ACTION_LOAD_SEARCH_CITY,
     // ACTION_LOAD_WEATHER_DATA,
 } from './config.js'
 
 // initial state
-const state = {
-    city        : {},
-    weatherData : {},
-    current     : null,
-    forecast    : null,
-}
+const
+    defaultMessage = 'Start search city',
+    state          = {
+        city           : {},
+        weatherData    : {},
+        current        : null,
+        forecast       : null,
+        message        : defaultMessage,
+    }
 
 // getters
 const getters = {
     [GETTER_CITY]: (state) => {
         return state.city
+    },
+    [GETTER_MESSAGE]: (state) => {
+        return state.message
     },
     [GETTER_WEATHER_DATA]: (state) => {
         return state.weatherData
@@ -60,28 +68,48 @@ const mutations = {
         state.weatherData = {}
         state.current     = null
         state.forecast    = null
+        state.message     = defaultMessage
+    },
+    [MUTATION_SET_STATE_DATA] (state, m){
+        state.city        = {}
+        state.weatherData = {}
+        state.current     = {}
+        state.forecast    = []
+        state.message     = m
+    },
+    [MUTATION_SET_MESSAGE] (state, message){
+        state.message = message
     }
 }
 
 // actions
 const actions = {
     async [ACTION_LOAD_SEARCH_CITY]({ commit }, nameCity) {
-        console.log('action', ACTION_LOAD_SEARCH_CITY, nameCity)
+        // console.log('action', ACTION_LOAD_SEARCH_CITY, nameCity)
+        commit(MUTATION_SET_STATE_DATA, 'Loading ...')
 
+        // search city
         let searchCity = await apiWeather(
                                             API_SEARCH_CITY,
                                             {
                                                 appid : API_APP_KEY,
                                                 q     : nameCity
                                             }
-                                        )
-        commit(MUTATION_SET_CITY, searchCity.data)
+                                        ).catch(err => err.response)
 
-        if(!searchCity.data || !searchCity.data.coord){
-            commit(MUTATION_SET_CITY, [])
+        if(!searchCity || !searchCity.data){
+            commit(MUTATION_SET_STATE_DATA, 'An error occurred')
+            return
+        }
+        if(searchCity.data.cod != 200){
+            commit(MUTATION_SET_STATE_DATA, searchCity.data.message)
             return
         }
 
+        commit(MUTATION_SET_CITY, searchCity.data)
+
+
+        // fetch daily data
         let coord       = searchCity.data.coord,
             weatherData = await apiWeather(
                                             API_WEATHER_DATA,
@@ -92,9 +120,15 @@ const actions = {
                                                 units   : 'metric',
                                                 exclude : 'hourly,minutely',
                                             }
-                                        )
+                                        ).catch(err => err.response)
+
+        if(!weatherData || !weatherData.data){
+            commit(MUTATION_SET_STATE_DATA, 'An error occurred')
+            return
+        }
 
         commit(MUTATION_SET_WEATHER_DATA, weatherData.data);
+        commit(MUTATION_SET_MESSAGE, '');
     },
 
     // async [ACTION_LOAD_WEATHER_DATA]({ commit }) {
@@ -105,10 +139,10 @@ const actions = {
 
 async function apiWeather(api, params){
     console.log('apiWeather', api, params)
-    return await request({
-        params : params,
-        url    : api,
-    });
+    return await axios({
+                        params : params,
+                        url    : api,
+                    })
 }
 
 export default {
