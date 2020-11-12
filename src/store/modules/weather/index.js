@@ -6,8 +6,11 @@ import {
     API_WEATHER_DATA,
     GETTER_CITY,
     GETTER_WEATHER_DATA,
+    GETTER_CURRENT_WEATHER,
+    GETTER_FORECAST_WEATHER,
     MUTATION_SET_CITY,
     MUTATION_SET_WEATHER_DATA,
+    MUTATION_SET_EMPTY_DATA,
     ACTION_LOAD_SEARCH_CITY,
     // ACTION_LOAD_WEATHER_DATA,
 } from './config.js'
@@ -15,7 +18,9 @@ import {
 // initial state
 const state = {
     city        : {},
-    weatherData : [],
+    weatherData : {},
+    current     : null,
+    forecast    : null,
 }
 
 // getters
@@ -25,6 +30,18 @@ const getters = {
     },
     [GETTER_WEATHER_DATA]: (state) => {
         return state.weatherData
+    },
+    [GETTER_WEATHER_DATA]: (state) => {
+        return state.weatherData
+    },
+    [GETTER_WEATHER_DATA]: (state) => {
+        return state.weatherData
+    },
+    [GETTER_CURRENT_WEATHER]: (state) => {
+        return state.current
+    },
+    [GETTER_FORECAST_WEATHER]: (state) => {
+        return state.forecast
     }
 }
 
@@ -35,7 +52,20 @@ const mutations = {
     },
     [MUTATION_SET_WEATHER_DATA](state, weatherData){
         state.weatherData = weatherData
+
+        if(weatherData.daily.length){
+            // let {current, ...forecast} = weatherData.daily
+
+            state.current  = weatherData.daily.splice(0,1)
+            state.forecast = weatherData.daily
+        }
     },
+    [MUTATION_SET_EMPTY_DATA] (state){
+        state.city        = {}
+        state.weatherData = {}
+        state.current     = null
+        state.forecast    = null
+    }
 }
 
 // actions
@@ -53,6 +83,7 @@ const actions = {
         commit(MUTATION_SET_CITY, searchCity.data)
 
         if(!searchCity.data || !searchCity.data.coord){
+            commit(MUTATION_SET_CITY, [])
             return
         }
 
@@ -63,6 +94,7 @@ const actions = {
                                                 appid   : API_APP_KEY,
                                                 lat     : coord.lat,
                                                 lon     : coord.lon,
+                                                units   : 'metric',
                                                 exclude : 'hourly,minutely',
                                             }
                                         )
